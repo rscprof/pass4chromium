@@ -1,0 +1,25 @@
+{
+    "manifest_version": 2,
+    "name": "passwordstore",
+    "version": "1.0",
+    "default_locale": "en",
+    "description": "An Interface for the standard unix password manager (passwordstore.org)",
+    "icons": { "128": "icon.png" }, //icon from firefox extension (https://github.com/jvenant/passff)
+    "browser_action": {
+	"default_icon": {
+	    "128": "icon.png"},
+	"default_title": "Password store",
+	"default_popup": "popup.html"
+	    
+    },
+    "background": {
+	"scripts": ["background.js"]
+    },
+    "author": "rscprof",
+    "short_name": "passchromium",
+    "version_name": "1.0 alpha",
+    "permissions": ["nativeMessaging"]
+
+}
+    
+    
