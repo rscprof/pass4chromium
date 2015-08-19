@@ -1,3 +1,29 @@
+/**
+ * @param dp1 Directory or name of password
+ * @param dp2 Directory or name of password
+ *
+ * if dp1 or dp2 is array then it is a directory, first item of the array is name of directory
+ * if dp1 or dp2 is string then it is a password's name
+ */
+function sortDirAndPasswords (dp1,dp2)
+{
+    switch (typeof dp1)
+    {
+	case "string":
+	switch (typeof dp2)
+	{
+	    case "string": return (dp1<dp2)?-1:(dp1==dp2)?0:1;
+	    default: return -1; //"string" is password, passwords will on top of window
+	}
+	default:
+	switch (typeof dp2)
+	{
+	    case "string": return 1;
+	    default: return (dp1[0]<dp2[0])?-1:(dp1[0]==dp2[0])?0:1;
+	}
+	
+    }
+}
 
 function showDirectory (msg,name,parent,fullPath)
 {
@@ -16,7 +42,7 @@ function showDirectory (msg,name,parent,fullPath)
              divNew.addEventListener ('click',parent)
              div.appendChild (divNew)
     }
-    for (item in msg)
+    for (item in msg.sort (sortDirAndPasswords))
     {
 	if (typeof(msg[item])=="string")
 	{
