@@ -25,36 +25,57 @@ function sortDirAndPasswords (dp1,dp2)
     }
 }
 
-function showDirectory (msg,name,parent,fullPath)
+
+
+
+/**
+ *
+ * @param msg descriptor of password store
+ * @param name name of directory or message 'All passwords'
+ * @param fullPath full path to the directory (for generating full path to password for `pass show`)
+ * @param textTitle node for title in the popup window
+ * @param divNew div for showing the content of directory
+ * @param filterText text for filtering name of directory and password's names
+ * @param searcher div for search elements
+ */
+function showDirectory (msg,name,parent,fullPath,textTitle,divNew,filterText,searcher)
 {
-    div=document.getElementById('passwordslist');
-    div.innerHTML='';
-    h3=document.createElement('h3')
-    h3.appendChild(document.createTextNode(name))
-    div.appendChild(h3)
+    textTitle.nodeValue=name;
+    divNew.innerHTML='';
     if (parent)
     {
 	     //This is a directory parent
- 	     divNew=document.createElement ('div')
-	     divNew.className="dir"
-    	     textNew=document.createTextNode ('..');
-  	     divNew.appendChild (textNew);
-             divNew.addEventListener ('click',parent)
-             div.appendChild (divNew)
-    }
-    for (item in msg.sort (sortDirAndPasswords))
+	var divNew2=document.createElement ('div');
+	divNew2.className="dir"
+    	var textNew=document.createTextNode ('..');
+  	divNew2.appendChild (textNew);
+        divNew2.addEventListener ('click',parent);
+	divNew.appendChild (divNew2);
+	searcher.style.display='none';
+    } else
     {
-	if (typeof(msg[item])=="string")
+	searcher.style.display='block';
+	
+    }
+    var msgFilters;
+    for (item in msgFilters=msg.sort (sortDirAndPasswords).filter (function (arg) {
+	if ((typeof arg=="string")&&(arg.substr(0,filterText.length)==filterText)) return true;
+	if (arg[0].substr(0,filterText.length)==filterText) return true;
+	return false;
+    }))
+    {
+	v=msgFilters[item]
+	if (typeof v=="string")
 	{
 	    //show Password Description
- 	   divNew=document.createElement ('div')
-	   textNew=document.createTextNode (msg[item])
-           divNew.appendChild (textNew)
-            divNew.className="file";
+ 	   var divNew2=document.createElement ('div')
+	   textNew=document.createTextNode (v)
+           divNew2.appendChild (textNew)
+            divNew2.className="file";
 	    (function ()
 	     {
-		 var path=((fullPath=="")?"":(fullPath+'/'))+msg[item]
-	         divNew.addEventListener ('click',function(){
+		 var path=((fullPath=="")?"":(fullPath+'/'))+v
+	         divNew2.addEventListener ('click',function(){
                      chrome.extension.sendMessage({command:"show",path:path},function (msg)
 						  {
 
@@ -72,23 +93,23 @@ function showDirectory (msg,name,parent,fullPath)
 				              })
 		 })
              })()
-	   div.appendChild (divNew)
+	   divNew.appendChild (divNew2)
 	} else
 	{
 	     //This is a directory
- 	     divNew=document.createElement ('div')
-	     divNew.className="dir"
-    	     textNew=document.createTextNode (msg[item][0]);
-  	     divNew.appendChild (textNew);
+ 	     var divNew2=document.createElement ('div')
+	     divNew2.className="dir"
+    	     textNew=document.createTextNode (v[0]);
+  	     divNew2.appendChild (textNew);
 	    (function(dirDescription) {
 		var description=dirDescription.slice(0) //clone
 		var nameLocal=description.shift();
 		var path=((fullPath=="")?"":(fullPath+'/'))+nameLocal
-  	        divNew.addEventListener ('click',function (){
-		    showDirectory (description,nameLocal,function () {showDirectory (msg,name,parent,path)},path)
+  	        divNew2.addEventListener ('click',function (){
+		    showDirectory (description,nameLocal,function () {showDirectory (msg,name,parent,fullPath,textTitle,divNew,filterText,searcher)},path,textTitle,divNew,"",searcher)
 	        })
-	    }(msg[item]))
-             div.appendChild (divNew)
+	    }(v))
+             divNew.appendChild (divNew2)
 
 	 }
     }
@@ -96,12 +117,38 @@ function showDirectory (msg,name,parent,fullPath)
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    var div=document.getElementById('passwordslist');
+    div.innerHTML='';
+    var h3=document.createElement('h3');
+    var textTitle=document.createTextNode("");
+    h3.appendChild(textTitle);
+    div.appendChild(h3);
+    divNew=document.createElement ('div')
+ 	var divSearch=document.createElement ('div');
+	var textNew=document.createTextNode ('Search: ');
+  	divSearch.appendChild (textNew);
+	//             divNew.addEventListener ('click',parent)
+	var edit=document.createElement ('input')
+	edit.type='text'
+	divSearch.appendChild (edit)
+	div.appendChild (divSearch);
+    div.appendChild (divNew)
+
+
+    
       chrome.extension.sendMessage("ls",function (msg)
 				 {
-				     showDirectory (msg,'All passwords',null,'');
+
+				     edit.addEventListener ('input',function () {filter(msg,edit,textTitle,divNew,divSearch)})
+				     showDirectory (msg,'All passwords',null,'',textTitle,divNew,"",divSearch);
 				     return true;
 				 })
 })
 
 
 
+function filter(msg,edit,textTitle,divNew,searcher)
+{
+    showDirectory (msg,(edit.value=="")?"All passwords":'Filter by '+edit.value,null,'',textTitle,divNew,edit.value,searcher);
+}
