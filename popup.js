@@ -78,11 +78,15 @@ function showDirectory (msg,name,parent,fullPath,textTitle,divNew,filterText,sea
 	         divNew2.addEventListener ('click',function(){
                      chrome.extension.sendMessage({command:"show",path:path},function (msg)
 						  {
-
+							if (msg.Error) {
+								alert (msgError);
+								return false;
+									
+							}
 						      var copyDiv = document.createElement('div');
 						      copyDiv.contentEditable = true;
 						      document.body.appendChild(copyDiv);
-						      copyDiv.innerHTML = msg;
+						      copyDiv.innerHTML = msg.Password;
 						      copyDiv.unselectable = "off";
 						      copyDiv.focus();
 						      document.execCommand('SelectAll');
@@ -139,13 +143,39 @@ document.addEventListener('DOMContentLoaded', function () {
     
       chrome.extension.sendMessage("ls",function (msg)
 				 {
-
-				     edit.addEventListener ('input',function () {filter(msg,edit,textTitle,divNew,divSearch)})
-				     showDirectory (msg,'All passwords',null,'',textTitle,divNew,"",divSearch);
-				     return true;
+					if (msg.Error)
+					{
+						alert (msg.Error);
+						return false;
+					}
+//					alert (Object.keys(msg.Ls))
+//
+//					recoding in old format
+					
+					var msg2=recode(msg.Ls)
+//					alert (msg)
+				     	edit.addEventListener ('input',function () {filter(msg2,edit,textTitle,divNew,divSearch)})
+				     	showDirectory (msg2,'All passwords',null,'',textTitle,divNew,"",divSearch);
+				     	return true;
 				 })
 })
 
+function recode(msgObject)
+{
+	var result=[]
+//	alert (Object.keys(msgObject))
+	for (var name in msgObject)
+	{
+	//	alert (name)
+		if (msgObject[name]===null) { result.push(name) }else
+		{
+			var arr = recode(msgObject[name])
+			arr.unshift (name)
+			result.push (arr)
+		}
+	}
+	return result
+}
 
 
 function filter(msg,edit,textTitle,divNew,searcher)

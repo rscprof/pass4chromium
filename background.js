@@ -3,27 +3,34 @@ var passwordList="";
 var port = chrome.runtime.connectNative('com.zx2c4.pass');
       function loadpasswords(f_callback)
       {
+	      var f,f2;
 //        var port = chrome.runtime.connectNative('com.zx2c4.pass');
-          port.onMessage.addListener(function(msg) {
+          port.onMessage.addListener(f=function(msg) {
+		port.onMessage.removeListener (f)
+		port.onDisconnect.removeListener (f2)
 		passwordList=msg;
  	      f_callback (msg)
+
 	      return true;
         });
-        port.onDisconnect.addListener(function() {
+        port.onDisconnect.addListener(f2=function() {
         });
-          port.postMessage({ command: "ls" });
+          port.postMessage({ Command: "ls" });
       }
 
       function loadonepassword(path,f_callback)
       {
 //        var port = chrome.runtime.connectNative('com.zx2c4.pass');
-          port.onMessage.addListener(function(msg) {
+//        var f,f2;
+          port.onMessage.addListener(f=function(msg) {
+		port.onMessage.removeListener (f)
+		port.onDisconnect.removeListener (f2)
 	      f_callback (msg)
 	      return true;
         });
-        port.onDisconnect.addListener(function() {
+        port.onDisconnect.addListener(f2=function() {
         });
-          port.postMessage({ command: "show",path: path });
+          port.postMessage({ Command: "show",Path: path });
       }
 
 chrome.extension.onMessage.addListener(function(data, sender,f_callback) {

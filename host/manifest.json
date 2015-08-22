@@ -1,7 +1,7 @@
 {
   "name": "com.zx2c4.pass",
-  "description": "Standard password unix manager",
-  "path": "/home/rscprof/develop/chromium-pass/host/pass.py",
+  "description": "Standard password unix manager host on go",
+  "path": "/home/rscprof/develop/chromium-pass/host/chromiumpasshost",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://hnmidppabnojbgfbncmopejbniodpddg/"
